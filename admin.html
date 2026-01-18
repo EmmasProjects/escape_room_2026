@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Color Toggle Controller</title>
+    <style>
+        .button-section {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding-top: 20px;
+            background: #fdfdfd;
+        }
+
+        .page-description {
+            justify-content: center;
+            /* Horizontal centering */
+            text-align: center;
+        }
+
+        /* The Card Container */
+        .control-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            width: 140px;
+        }
+
+        /* Status Indicator Box */
+        .status-box {
+            width: 100%;
+            height: 60px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transition: 0.4s;
+            border: 1px solid #eee;
+        }
+
+        /* The Switch (Slider) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        /* Toggle Colors */
+        input:checked+.slider {
+            background-color: #2ecc71;
+        }
+
+        /* Green when ON */
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2ecc71;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+
+        h3 {
+            margin: 10px 0;
+            color: #444;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="page-description" class="page-description">
+        <h1>Escape Room Control Page</h1>
+        <p>This page is designed to be used by the GM to show when the players have placed the artefacts on the correct podiums.</p>
+    </section>
+    <section id="button-control" class="button-section">
+        <div class="control-card">
+            <h3>Artefact 1 complete</h3>
+            <div id="box-0" class="status-box"></div>
+            <label class="switch">
+                <input type="checkbox" id="toggle-0" onchange="handleToggle(0)">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="control-card">
+            <h3>Artefact 2 complete</h3>
+            <div id="box-1" class="status-box"></div>
+            <label class="switch">
+                <input type="checkbox" id="toggle-1" onchange="handleToggle(1)">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="control-card">
+            <h3>Artefact 3 complete</h3>
+            <div id="box-2" class="status-box"></div>
+            <label class="switch">
+                <input type="checkbox" id="toggle-2" onchange="handleToggle(2)">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </section>
+
+    <script>
+        // Sync the UI with the Server state
+        async function syncUI() {
+            const res = await fetch('/colors');
+            const data = await res.json();
+
+            data.colors.forEach((color, index) => {
+                const box = document.getElementById(`box-${index}`);
+                const toggle = document.getElementById(`toggle-${index}`);
+
+                box.style.backgroundColor = color;
+                // Set toggle to checked if color is green
+                toggle.checked = (color === 'green');
+            });
+        }
+
+        // Logic for when a switch is flipped
+        async function handleToggle(index) {
+            const isChecked = document.getElementById(`toggle-${index}`).checked;
+            const selectedColor = isChecked ? 'green' : 'red';
+
+            await fetch('/update-color', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index, new_color: selectedColor })
+            });
+
+            syncUI(); // Refresh UI to confirm update
+        }
+
+        // Initial fetch
+        syncUI();
+    </script>
+</body>
+
+</html>
