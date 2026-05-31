@@ -8,7 +8,12 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from fastapi.staticfiles import StaticFiles
+
 app = FastAPI()
+
+# Serve everything in /static
+app.mount("/", StaticFiles(directory="static"), name="static")
 
 # State defined as a list
 state = ["red", "red", "red"]
@@ -52,6 +57,17 @@ def update_color(updated_colour: ColourUpdateSchema) -> ColourReturnSchema:
 def read_index() -> FileResponse:
     """Return the index html file."""
     return FileResponse("index.html")
+
+@app.get("/lights")
+def show_lights_page() -> FileResponse:
+    """Return the index html file."""
+    return FileResponse("lights.html")
+
+
+@app.get("/password-entry")
+def show_password_page() -> FileResponse:
+    """Return the index html file."""
+    return FileResponse("password-entry.html")
 
 
 # @app.get("/admin") makes it so that you can

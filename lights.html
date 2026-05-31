@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remote State Monitor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1a1a1a;
+            /* Dark background for contrast */
+        }
+
+        /* Container ensures circles are evenly spaced */
+        .container {
+            display: flex;
+            justify-content: space-evenly;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .status-group {
+            display: flex;
+            flex-direction: column;
+            /* Stacks circle over plaque */
+            align-items: center;
+            /* Centers children horizontally along the cross-axis */
+            justify-content: center;
+        }
+
+        .circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #333;
+            /* Default "off" or loading color */
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+            /* Adds 20px of space specifically below the circle */
+            margin-bottom: 20px;
+            /* No cursor:pointer because it's not clickable */
+        }
+
+        .plaque {
+            background: linear-gradient(145deg, #d4af37, #b8860b);
+            /* Metallic Gold */
+            color: #2c2c2c;
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: 2px solid #8b6508;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 140px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            font-size: 0.9rem;
+        }
+
+        /* Active state determined by API */
+        .status-red {
+            background-color: #ff4d4d;
+            box-shadow: 0 0 20px #ff4d4d;
+        }
+
+        .status-green {
+            background-color: #2ecc71;
+            box-shadow: 0 0 20px #2ecc71;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="status-group">
+            <div id="circle-0" class="circle status-red"></div>
+            <div id="plaque-0" class="plaque">Artefact 1</div>
+        </div>
+
+        <div class="status-group">
+            <div id="circle-1" class="circle status-red"></div>
+            <div id="plaque-1" class="plaque">Artefact 2</div>
+        </div>
+
+        <div class="status-group">
+            <div id="circle-2" class="circle status-red"></div>
+            <div id="plaque-2" class="plaque">Artefact 3</div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Configuration: Set your API URL here
+        const API_URL = "/colors";
+        const REFRESH_RATE = 1000; // Poll delay (in milli-seconds)
+
+        /**
+         * Fetches state from the REST API and updates the circles.
+         * Expected JSON format example: ["red", "red", "green"]
+         */
+        async function updateDashboard() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const states = await response.json();
+                const colours = states.colors;
+
+                // Iterate through the circles and apply the color from the server
+                colours.forEach((color, index) => {
+                    const circle = document.getElementById(`circle-${index}`);
+                    if (circle) {
+                        // Reset classes and apply the specific color state
+                        circle.className = 'circle';
+                        if (color === 'red') circle.classList.add('status-red');
+                        if (color === 'green') circle.classList.add('status-green');
+                    }
+                });
+            } catch (error) {
+                console.error("Failed to sync with server:", error);
+            }
+        }
+
+        // Start polling
+        updateDashboard(); // Initial call
+        setInterval(updateDashboard, REFRESH_RATE);
+    </script>
+
+</body>
+
+</html>
