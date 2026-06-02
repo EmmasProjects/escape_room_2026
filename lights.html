@@ -108,17 +108,21 @@
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('Network response was not ok');
 
-                const states = await response.json();
-                const colours = states.colors;
+                const data = await response.json();
+                
 
                 // Iterate through the circles and apply the color from the server
-                colours.forEach((color, index) => {
+                data.found.forEach((found, index) => {
                     const circle = document.getElementById(`circle-${index}`);
                     if (circle) {
                         // Reset classes and apply the specific color state
                         circle.className = 'circle';
-                        if (color === 'red') circle.classList.add('status-red');
-                        if (color === 'green') circle.classList.add('status-green');
+                        if (found) {
+                                circle.classList.add('status-green');
+                            
+                        } else {
+                circle.classList.add('status-red')        
+                        }
                     }
                 });
             } catch (error) {

@@ -133,39 +133,89 @@
         </div>
     </section>
 
+    <h3>Game Control</h3>
+
+<label>
+    <input type="checkbox" id="stageToggle" onchange="updateStage()">
+    Start Game (enable participants)
+</label>
+
+<script>
+async function updateStage() {
+    const toggle = document.getElementById("stageToggle").checked;
+    const stage = toggle ? "start" : "holding";
+
+    await fetch("/set-stage/" + stage, {
+        method: "POST"
+    });
+}
+</script>
+
     <script>
         // Sync the UI with the Server state
         async function syncUI() {
             const res = await fetch('/colors');
             const data = await res.json();
-
-            data.colors.forEach((color, index) => {
+            
+            data.found.forEach((found, index) => {
+                console.log("found:", found, "index", index)
                 const box = document.getElementById(`box-${index}`);
                 const toggle = document.getElementById(`toggle-${index}`);
 
-                box.style.backgroundColor = color;
-                // Set toggle to checked if color is green
-                toggle.checked = (color === 'green');
+                if (found) {
+                    box.style.backgroundColor = 'green';
+                    // Set toggle to checked if color is green
+                    toggle.checked = found;
+                } else {
+                    box.style.backgroundColor = 'red';
+                }
             });
+        }
+
+        async function updateSlider(num, found) {
+            await fetch(`/artefact-found/${num}/${found}`, {
+                method: "POST"
+            });
+            console.log("item updated", num, found)
+            syncUI(); // Refresh UI to confirm update
+        
         }
 
         // Logic for when a switch is flipped
         async function handleToggle(index) {
             const isChecked = document.getElementById(`toggle-${index}`).checked;
-            const selectedColor = isChecked ? 'green' : 'red';
+            console.log(index, isChecked)
+            await updateSlider(index, isChecked)
+            
 
-            await fetch('/update-color', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index: index, new_color: selectedColor })
-            });
-
-            syncUI(); // Refresh UI to confirm update
+            
         }
+
+            </script>
+
+
+<!-- <label>
+    <input type="checkbox" onchange="updateSlider(1, this.checked)">
+    Object 1 Found
+</label>
+
+<label>
+    <input type="checkbox" onchange="updateSlider(2, this.checked)">
+    Object 2 Found
+</label>
+
+<label>
+    <input type="checkbox" onchange="updateSlider(3, this.checked)">
+    Object 3 Found
+</label> -->
+
+<script>
+
 
         // Initial fetch
         syncUI();
-    </script>
+</script>
+
 </body>
 
 </html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Escape Room</title>
+</head>
+
+<body style="background:black; color:white; text-align:center; margin-top:200px;">
+
+<img src="logo2.png" width="1000">
+
+<script>
+async function checkState() {
+    try {
+        const res = await fetch("/state");
+        const data = await res.json();
+
+        if (data.stage === "start") {
+            window.location.href = "password-entry.html";
+        }
+    } catch (err) {
+        console.log("Server not ready");
+    }
+}
+
+// Check every 2 seconds
+setInterval(checkState, 2000);
+</script>
+
+</body>
+</html>
