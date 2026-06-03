@@ -16,5 +16,5 @@ COPY index.html /app/index.html
 COPY main.py /app/main.py
 
 # Set the command that runs when the container starts
-ENTRYPOINT ["python"]
-CMD ["main.py"]
+ENTRYPOINT ["uvicorn"]
+CMD ["main:app", "--host", "0.0.0.0", "--port", "8000"]
