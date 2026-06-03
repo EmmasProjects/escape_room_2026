@@ -1,0 +1,51 @@
+services:
+  traefik:
+    image: docker.io/traefik:v3.7.1
+    container_name: traefik
+    command:
+      # Enable the Docker provider so Traefik listens for container changes
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # Define entrypoints for HTTP and HTTPS
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Global HTTP to HTTPS redirection
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      # Enable Let's Encrypt ACME configuration for SSL using .env variables
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=${LETSENCRYPT_EMAIL}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      # Using the Docker named volume declared at the bottom
+      - "letsencrypt_data:/letsencrypt"
+    networks:
+      - web
+
+  escape:
+    build:
+      context: ./app
+    container_name: escape
+    volumes:
+      - ./app:/app
+    networks:
+      - web
+    labels:
+      - "traefik.enable=true"
+      # Traefik injects your domain dynamically from the .env file here
+      - "traefik.http.routers.escape.rule=Host(`${DOMAIN_NAME}`)"
+      - "traefik.http.routers.escape.entrypoints=websecure"
+      - "traefik.http.routers.escape.tls.certresolver=myresolver"
+      - "traefik.http.services.escape.loadbalancer.server.port=8000"
+
+volumes:
+  # This creates a persistent Docker-managed directory for Let's Encrypt certificates
+  letsencrypt_data:
+
+networks:
+  web:
+    name: traefik_network
