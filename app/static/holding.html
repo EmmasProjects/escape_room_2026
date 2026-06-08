@@ -8,10 +8,15 @@
 
 <img src="logo2.png" width="1000">
 
+
+
+</body>
+
 <script>
 async function checkState() {
+    console.log("hi")
     try {
-        const res = await fetch("/state");
+        const res = await fetch("/stage");
         const data = await res.json();
 
         if (data.stage === "start") {
@@ -25,6 +30,4 @@ async function checkState() {
 // Check every 2 seconds
 setInterval(checkState, 2000);
 </script>
-
-</body>
 </html>

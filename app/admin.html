@@ -97,6 +97,24 @@
             font-size: 1.1em;
         }
     </style>
+    <script>
+        async function startGame() {
+    console.log("Starting the game")
+    
+    await fetch("/set-stage/start", {
+        method: "POST"
+    });
+
+    setTimeout(
+       setHolding, 5000
+
+    )
+}
+
+async function setHolding() {
+    await fetch("/set-stage/holding", {method: "POST"})
+}
+    </script>
 </head>
 
 <body>
@@ -136,22 +154,30 @@
     <h3>Game Control</h3>
 
 <label>
-    <input type="checkbox" id="stageToggle" onchange="updateStage()">
+    <button id="start-game" onclick="startGame()">
     Start Game (enable participants)
 </label>
 
 <script>
-async function updateStage() {
-    const toggle = document.getElementById("stageToggle").checked;
-    const stage = toggle ? "start" : "holding";
 
-    await fetch("/set-stage/" + stage, {
-        method: "POST"
-    });
+
+async function getStage() {
+    const resp = await fetch("/stage") 
+    const data = await resp.json()
+
+    const toggle = document.getElementById("stageToggle").checked;
+
+    if (data==="start") {
+        toggle.checked = true;
+    } elif (data==="holding") {
+        toggle.checked = false
+    }
 }
+
+setInterval(getStage, 2000)
 </script>
 
-    <script>
+<script>
         // Sync the UI with the Server state
         async function syncUI() {
             const res = await fetch('/colors');
@@ -191,7 +217,7 @@ async function updateStage() {
             
         }
 
-            </script>
+</script>
 
 
 <!-- <label>

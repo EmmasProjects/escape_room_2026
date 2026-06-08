@@ -20,8 +20,13 @@ game_stage = "holding"
 def get_state():
     return game_state
 
+@app.get("/stage")
+def get_stage():
+    return {"stage": game_stage}
+
 @app.post("/set-stage/{stage}")
 def set_stage(stage: str):
+    global game_stage
     game_stage = stage
     return {"status": "ok", "stage": game_stage}
 
