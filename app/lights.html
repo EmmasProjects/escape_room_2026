@@ -8,13 +8,29 @@
     <style>
         body {
             margin: 0;
-            padding: 0;
+            padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Stack items vertically */
             align-items: center;
-            height: 100vh;
             background-color: #1a1a1a;
-            /* Dark background for contrast */
+        }
+
+        /* Header (logo + text) */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            max-width: 200px; /* Adjust size as needed */
+            height: auto;
+            display: block;
+            margin: 0 auto 10px auto; /* Center + space below */
+        }
+
+        .header-text {
+            color: white;
+            font-size: 1.5rem;
         }
 
         /* Container ensures circles are evenly spaced */
@@ -28,9 +44,7 @@
         .status-group {
             display: flex;
             flex-direction: column;
-            /* Stacks circle over plaque */
             align-items: center;
-            /* Centers children horizontally along the cross-axis */
             justify-content: center;
         }
 
@@ -39,16 +53,12 @@
             height: 150px;
             border-radius: 50%;
             background-color: #333;
-            /* Default "off" or loading color */
             transition: background-color 0.5s ease, box-shadow 0.5s ease;
-            /* Adds 20px of space specifically below the circle */
             margin-bottom: 20px;
-            /* No cursor:pointer because it's not clickable */
         }
 
         .plaque {
             background: linear-gradient(145deg, #d4af37, #b8860b);
-            /* Metallic Gold */
             color: #2c2c2c;
             padding: 10px 20px;
             border-radius: 4px;
@@ -62,7 +72,6 @@
             font-size: 0.9rem;
         }
 
-        /* Active state determined by API */
         .status-red {
             background-color: #ff4d4d;
             box-shadow: 0 0 20px #ff4d4d;
@@ -77,6 +86,13 @@
 
 <body>
 
+    <!-- ✅ New Header Section -->
+    <div class="header">
+        <img src="logo2.png" alt="Logo" class="logo">
+        <div class="header-text">Hurry! Return all three artefacts to their correct time, and enter the calibration code to get back to the present day!</div>
+    </div>
+
+    <!-- Existing Content -->
     <div class="container">
         <div class="status-group">
             <div id="circle-0" class="circle status-red"></div>
@@ -95,33 +111,24 @@
     </div>
 
     <script>
-        // 1. Configuration: Set your API URL here
         const API_URL = "/colors";
-        const REFRESH_RATE = 1000; // Poll delay (in milli-seconds)
+        const REFRESH_RATE = 1000;
 
-        /**
-         * Fetches state from the REST API and updates the circles.
-         * Expected JSON format example: ["red", "red", "green"]
-         */
         async function updateDashboard() {
             try {
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('Network response was not ok');
 
                 const data = await response.json();
-                
 
-                // Iterate through the circles and apply the color from the server
                 data.found.forEach((found, index) => {
                     const circle = document.getElementById(`circle-${index}`);
                     if (circle) {
-                        // Reset classes and apply the specific color state
                         circle.className = 'circle';
                         if (found) {
-                                circle.classList.add('status-green');
-                            
+                            circle.classList.add('status-green');
                         } else {
-                circle.classList.add('status-red')        
+                            circle.classList.add('status-red');
                         }
                     }
                 });
@@ -130,11 +137,9 @@
             }
         }
 
-        // Start polling
-        updateDashboard(); // Initial call
+        updateDashboard();
         setInterval(updateDashboard, REFRESH_RATE);
     </script>
 
 </body>
-
 </html>

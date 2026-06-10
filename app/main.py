@@ -15,6 +15,19 @@ app = FastAPI()
 # State defined as a list
 game_state = [False, False, False]
 game_stage = "holding"
+calibration_state = [False, False]
+
+
+@app.post("/calibration/{stage}/{state}")
+def set_calibration(stage: int, state: bool):
+    global calibration_state
+    calibration_state[stage-1] = state
+    return calibration_state
+
+@app.get("/calibration")
+def get_calibration():
+    global calibration_state
+    return calibration_state
 
 @app.get("/state")
 def get_state():

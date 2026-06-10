@@ -105,6 +105,9 @@
         method: "POST"
     });
 
+    await fetch("/calibration/1/false", {method: "POST"})
+    await fetch("/calibration/2/false", {method: "POST"})
+
     setTimeout(
        setHolding, 5000
 
@@ -156,26 +159,17 @@ async function setHolding() {
 <label>
     <button id="start-game" onclick="startGame()">
     Start Game (enable participants)
+    </button>
 </label>
 
-<script>
+<h3>Calibration Status</h3>
+
+<div id="calibration-status">
+    <p id="cal1">Calibration code 1: NO</p>
+    <p id="cal2">Calibration code 2: NO</p>
+</div>
 
 
-async function getStage() {
-    const resp = await fetch("/stage") 
-    const data = await resp.json()
-
-    const toggle = document.getElementById("stageToggle").checked;
-
-    if (data==="start") {
-        toggle.checked = true;
-    } elif (data==="holding") {
-        toggle.checked = false
-    }
-}
-
-setInterval(getStage, 2000)
-</script>
 
 <script>
         // Sync the UI with the Server state
@@ -240,6 +234,30 @@ setInterval(getStage, 2000)
 
         // Initial fetch
         syncUI();
+</script>
+
+<script>
+async function updateCalibrationStatus() {
+    try {
+        const res = await fetch("/calibration");
+        const data = await res.json();
+
+        document.getElementById("cal1").innerText =
+            "Calibration code 1: " + (data[0] ? "YES" : "NO");
+
+        document.getElementById("cal2").innerText =
+            "Calibration code 2: " + (data[1] ? "YES" : "NO");
+
+    } catch (err) {
+        console.error("Failed to fetch calibration status", err);
+    }
+}
+
+// Run every 2 seconds
+setInterval(updateCalibrationStatus, 2000);
+
+// Run once on load
+updateCalibrationStatus();
 </script>
 
 </body>
